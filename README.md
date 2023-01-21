@@ -3,7 +3,7 @@ A command line and gui application for interacting with the OpenAI API
 
 ## Notes
 - Currently, you can only run ```chat.py``` (**after following the setup instructions**).
-  - This is the command-line tool that lets you hold a conversation.
+  - ```chat.py``` is the command-line tool that lets you hold a conversation.
 - The other python file, ```open_api_toolbox.py``` is the GUI application that I plan on integrating with ```chat.py```.
   - It is not ready, play with it if you want.
 - The converssation is handled with file storage in ```conversations.txt```.
