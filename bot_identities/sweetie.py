@@ -4,7 +4,7 @@ A very sweet and compassionate bot.
 Bot Name: Sweetie
 Author: Nikki Luzader
 
-This is a long description of your bot including notes/purpose, etc. Please make a copy of this bot before editing.
+She may be overbearing with the compliments, but thats what makes her sweetie.py
 """
 
 
