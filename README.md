@@ -39,7 +39,19 @@ A command line and gui application for interacting with the OpenAI API
 ## Roadmap
 - [x] Release a functional version.
 - [x] Make a custom bot template.
+- [ ] Expanded chat history. 
+  - My idea for this is to store all conversations in a folder, append an index to conversation.py for each conversation, as well as adding an optional parameter to the ```have_conversation()``` function to indicate if you want to pick up from an old chat or not.
+    - Example: ```have_conversation(have_conversation(conversation: str = "", bot_identity: dict = bots.AI, resume_convercation: bool = False):)``` 
+    - Separate ```resume_conversation()``` function will be fired if ```True``` and it will ask you which conversation you want to pick up on
+    - This will load the previous bot and conversation automatically as well as a "resume interaction" that happens before your first prompt
+    - Example resume interaction: ```r"Human: Hello, I'm back. Did you miss me?\n{bot_id}: {resume_text}"```
+    - Resume text will be added as a bot value during this implementation.
+- [ ] User Identities
+  - This may be a tricky one and could get scrapped, but I may implement the ability for the user to setup a custom Identity as well.
+  - Example: User is a Troll who lives in a cave and has never seen the outside world. Limited comprehension. Sometimes speaks in grunts.
+  - This might actually be dumb.
 - [ ] Add more bots.
 - [ ] Make a ```chat.py``` and ```open_ai_toolbox.py``` baby.
+  - Basically make them work together.
 
 
