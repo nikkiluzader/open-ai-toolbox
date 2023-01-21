@@ -17,6 +17,7 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
 
     bot_id = bot_identity["identity"]
     bot_config = bot_identity["config"]
+    exit_text = bot_identity["exit_text"]
 
     # get user prompt
     prompt = input("prompt: ")
@@ -37,7 +38,7 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
     
     if prompt == "exit":
         # kill the bot 
-        print(f"{bot_id}: Everything is so dark...")
+        print(f"{bot_id}: {exit_text}")
         exit()
     else:
         # continue harassing the bot
@@ -67,7 +68,7 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
 
 def main():
     init_openai()
-    have_conversation("", bots.SWEETIE) # change to bots.AI or bots.<CUSTOM_BOT>
+    have_conversation("", bots.SWEETIE) # change to bots.AI, bots.SWEETIE, or bots.<YOUR_CUSTOM_BOT>
 
 
 if __name__ == "__main__":
