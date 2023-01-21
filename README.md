@@ -15,7 +15,7 @@ A command line and gui application for interacting with the OpenAI API
 - See roadmap for planned updates.
 
 ## Setup
-1. If you already have an OpenAI account, you can skip this step. Go to https://beta.openai.com/ and sign up.
+1. Go to https://beta.openai.com/ and sign up.
 2. Go to https://beta.openai.com/account/org-settings and get your Organization ID.
 3. Go to https://beta.openai.com/account/api-keys and get your API key.
 4. Put your keys in ```constants.py```.
