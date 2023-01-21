@@ -104,7 +104,7 @@ def get_image(url, name):
 
 
 
-width, height, channels, data = dpg.load_image("./images/11.png")
+width, height, channels, data = dpg.load_image("./images/temp.jpg")
 
 with dpg.texture_registry(show=False):
     dpg.add_dynamic_texture(width=width, height=height, default_value=data, tag="imgraw")
