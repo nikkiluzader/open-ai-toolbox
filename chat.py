@@ -10,7 +10,7 @@ def init_openai():
 
 def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
     """
-    Begin or continue a consersation with the AI model
+    Begin or continue a conversation with the AI model
 
     If no bot is chosen, the default bot will be used, which is open ended.
     """

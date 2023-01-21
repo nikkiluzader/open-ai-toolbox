@@ -1,6 +1,11 @@
 # OpenAI Toolbox
 A command line and gui application for interacting with the OpenAI API
 
+## Features
+- Bot Identities - use the built in bots or create your own with it's own personality
+- Conversation History - main conversation is ongoing and stored in a txt file
+- Easy setup - nothing too fancy (yet)
+
 ## Notes
 - Currently, you can only run ```chat.py``` (**after following the setup instructions**).
   - ```chat.py``` is the command-line tool that lets you hold a conversation.
