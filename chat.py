@@ -39,6 +39,8 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
     if prompt == "exit":
         # kill the bot 
         print(f"{bot_id}: {exit_text}")
+        with open("conversation.txt", "a") as conversation_file:
+            conversation_file.write(f"{exit_text}\n")
         exit()
     else:
         # continue harassing the bot
