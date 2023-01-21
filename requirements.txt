@@ -1,0 +1,4 @@
+dearpygui
+pyperclip
+screeninfo
+openai
