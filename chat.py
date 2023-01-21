@@ -67,7 +67,7 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
 
 def main():
     init_openai()
-    have_conversation("", bots.MARV) # change to bots.AI or bots.<CUSTOM_BOT>
+    have_conversation("", bots.SWEETIE) # change to bots.AI or bots.<CUSTOM_BOT>
 
 
 if __name__ == "__main__":
