@@ -18,10 +18,10 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
     bot_id = bot_identity["identity"]
     bot_config = bot_identity["config"]
 
-    # get user input
+    # get user prompt
     prompt = input("prompt: ")
 
-    
+
     if conversation == "":
         # if conversation is empty, load up a starter pack based on the bot
         conversation = bot_identity["starter_pack"] + f"\nHuman: {prompt}\n{bot_id}: "
@@ -33,7 +33,6 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
             conversation_file.write(f"\nHuman: {prompt}\n{bot_id}: ")
         with open("conversation.txt", "r") as conversation_file:
             conversation = conversation_file.read()
-        prompt = conversation
 
     
     if prompt == "exit":
@@ -45,7 +44,7 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
         # make a call to the API and get bot response
         res = openai.Completion.create(
             model="text-davinci-003",
-            prompt=prompt,
+            prompt=conversation,
             max_tokens=2048,
             temperature=bot_config["temperature"],
             user="session000",
@@ -63,7 +62,7 @@ def have_conversation(conversation: str = "", bot_identity: dict = bots.AI):
             conversation_file.write(f"{txt_response}\n")
 
         # force conversation to continue (yeah I know this is hacky right now)
-        have_conversation("continue", bot_identity)
+        have_conversation(conversation, bot_identity)
 
 
 def main():
