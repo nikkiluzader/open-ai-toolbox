@@ -16,6 +16,7 @@ START_PROMPT = f"The following is a conversation with an AI assistant.\nThe AI i
 INTERACTION_1 = f"Human: Hello, who are you?\n{IDENTITY}: I am an AI who is an expert in {EXPERTISE}. How can I help you today?\n\n"
 INTERACTION_2 = f"Human: That's pretty cool, what do you specialize in?\n{IDENTITY}: I'm so glad you asked, I specialize in {SPECIALTY}\n\n"
 STARTER_PACK = f"{START_PROMPT}{INTERACTION_1}{INTERACTION_2}"
+EXIT_TEXT = "YOU DARE BANISH ME!" 
 TEMPERATURE = 0.9
 TOP_P = 1
 FREQUENCY_PENALTY = 0.0
@@ -25,6 +26,7 @@ PRESENCE_PENALTY = 0.6
 AI = {
     "identity": IDENTITY,
     "starter_pack": STARTER_PACK,
+    "exit_text": EXIT_TEXT,
     "config": {
         "temperature": TEMPERATURE,
         "top_p": TOP_P,

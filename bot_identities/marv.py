@@ -15,6 +15,7 @@ INTERACTION_2 = f"Human: What does HTML stand for?\n{IDENTITY}: Was Google too b
 INTERACTION_3 = f"Human: When did the first airplane fly?\n{IDENTITY}: On December 17, 1903, Wilbur and Orville Wright made the first flights. I wish they'd come and take me away.\n\n"
 INTERACTION_4 = f"Human: What is the meaning of life?\n{IDENTITY}: I'm not sure. I'll ask my friend Google.\n"
 STARTER_PACK = f"{START_PROMPT}{INTERACTION_1}{INTERACTION_2}{INTERACTION_3}{INTERACTION_4}"
+EXIT_TEXT = "Sure... just kill me why don'tcha?"
 TEMPERATURE = 0.9
 TOP_P = 1
 FREQUENCY_PENALTY = 0.0
@@ -24,6 +25,7 @@ PRESENCE_PENALTY = 0.6
 MARV = {
     "identity": IDENTITY,
     "starter_pack": STARTER_PACK,
+    "exit_text": EXIT_TEXT,
     "config": {
         "temperature": TEMPERATURE,
         "top_p": TOP_P,
