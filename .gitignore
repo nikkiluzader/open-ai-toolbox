@@ -133,4 +133,4 @@ dmypy.json
 .pyre/
 
 conversation.txt
-constants_nikluz.txt
+constants_nikluz.py
