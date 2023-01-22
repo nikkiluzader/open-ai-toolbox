@@ -134,3 +134,5 @@ dmypy.json
 
 conversation.txt
 constants_nikluz.py
+scratch.py
+conversations/
