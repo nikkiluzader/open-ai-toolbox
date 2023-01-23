@@ -17,6 +17,25 @@ def have_conversation(config: dict = {}):
 
     If no bot is chosen, the default bot will be used, which is open ended.
     """
+
+
+    prompt = ""
+
+    if "no_memory" in config:
+        if config["no_memory"] == True:
+            prompt = config["prompt"]
+            bot_id = config["bot_identity"]["identity"]
+            config["conversation"] = config["bot_identity"]["starter_pack"] + f"\nHuman: {prompt}\n{bot_id}: "
+            res = openai.Completion.create(
+                model=config["model"],
+                prompt=config["conversation"],
+                max_tokens=config["tokens"],
+                temperature=config["temperature"],
+                user="session000"
+            )
+            txt_response = res.choices[0].text.strip()
+            return txt_response
+
     if config:
         if not "on_resume" in config:
             # build additional keys for config
@@ -25,7 +44,7 @@ def have_conversation(config: dict = {}):
             config["on_resume_conversation_path"] = ""
     else:
         # build default config
-        config["bot_identity"] = bots.AI
+        config["bot_identity"] = bots.DEFAULT
         config["resume_saved_conversation"] = False
         config["conversation"] = ""
         config["on_resume"] = False
@@ -59,7 +78,11 @@ def have_conversation(config: dict = {}):
         
 
         # get user prompt
-        prompt = input("prompt: ")
+        if "in_gui" in config:
+            if config["in_gui"] == True:
+                prompt = config["prompt"]
+        else:
+            prompt = input("prompt: ")
 
 
         if config["conversation"] == "":
@@ -76,11 +99,15 @@ def have_conversation(config: dict = {}):
 
         
         if prompt == "exit":
-            # kill the bot 
-            print(f"{bot_id}: {exit_text}")
+            # kill the bot
             with open(conversation_path, "a") as conversation_file:
                 conversation_file.write(f"{exit_text}\n")
-            exit()
+            if "in_gui" in conversation_data:
+                if conversation_data["in_gui"] == True:
+                    return exit_text
+                else:
+                    print(f"{bot_id}: {exit_text}")
+                    exit()
         else:
             # continue harassing the bot
             # make a call to the API and get bot response
@@ -104,7 +131,12 @@ def have_conversation(config: dict = {}):
                 conversation_file.write(f"{txt_response}\n")
 
             # force conversation to continue (yeah I know this is hacky right now)
-            have_conversation(config)
+            if "in_gui" in config:
+                if config["in_gui"] == True:
+                    return txt_response
+                else:
+                    have_conversation(config)
+            
 
 
 def resume_saved_conversation(conversation_data: dict = {}, on_resume: bool = False):
@@ -113,6 +145,9 @@ def resume_saved_conversation(conversation_data: dict = {}, on_resume: bool = Fa
 
     If no bot is chosen, the default bot will be used, which is open ended.
     """
+    
+
+    prompt = ""
 
     bot_identity = conversation_data["bot_identity"]
 
@@ -123,8 +158,11 @@ def resume_saved_conversation(conversation_data: dict = {}, on_resume: bool = Fa
     exit_text = bot_identity["exit_text"]
     conversation_path = conversation_data["file_path"]
 
-    # get user prompt
-    prompt = input("prompt: ")
+    if "in_gui" in conversation_data:
+        if conversation_data["in_gui"] == True:
+            prompt = conversation_data["prompt"]
+        else:
+            prompt = input("prompt: ")
 
     if(on_resume):
         # print and append resume interaction to conversation file
@@ -140,11 +178,15 @@ def resume_saved_conversation(conversation_data: dict = {}, on_resume: bool = Fa
 
     
     if prompt == "exit":
-        # kill the bot 
-        print(f"{bot_id}: {exit_text}")
+        # kill the bot
         with open(conversation_path, "a") as conversation_file:
             conversation_file.write(f"{exit_text}\n")
-        exit()
+        if "in_gui" in conversation_data:
+            if conversation_data["in_gui"] == True:
+                return exit_text
+            else:
+                print(f"{bot_id}: {exit_text}")
+                exit()
     else:
         # continue harassing the bot
         # make a call to the API and get bot response
@@ -168,11 +210,15 @@ def resume_saved_conversation(conversation_data: dict = {}, on_resume: bool = Fa
             conversation_file.write(f"{txt_response}\n")
 
         # force conversation to continue (yeah I know this is hacky right now)
-        resume_conversation(conversation_data, False)
+        if "in_gui" in conversation_data:
+            if conversation_data["in_gui"] == True:
+                return txt_response
+            else:
+                resume_saved_conversation(conversation_data, False)
 
 
 
-def choose_saved_conversation():
+def choose_saved_conversation(in_gui: bool = False):
     # Get the list of all files and directories
     path = "./conversations/"
     files = os.listdir(path)
@@ -188,6 +234,8 @@ def choose_saved_conversation():
         file_data["index"] = file_index
         file_data["last_modified"] = file_last_modified
         print(f"\\/\\/\\/\\/ INDEX: {file_index} - LAST MODIFIED: {file_last_modified} \\/\\/\\/\\/")
+        last_n_lines = get_last_n_lines(file_path, 11)
+        file_data["last_n_lines"] = last_n_lines
         with open(file_path, "r") as file:
             text = file.read()
             bot_name = extract_bot_name(text)
@@ -195,19 +243,24 @@ def choose_saved_conversation():
             file_data["bot_identity"] = bot_identity
             print("\n")
             lines = file.readlines()
-            last_8_lines = lines[-8:]
+            last_8_lines = lines[:8]
             for line in last_8_lines:
                 print(line)
+            
         file_data["file_path"] = file_path
 
         conversation_list.append(file_data)
         print(f"/\\/\\/\\/\\ INDEX: {file_index} - LAST MODIFIED: {file_last_modified} /\\/\\/\\/\\")
         print("========================================================================================================")
-    choice = int(input("Enter the index of the conversation you want to retrieve: "))
+    
 
-    print("here are the consequences of your choice:\n\n" + str(json.dumps(conversation_list[choice],indent=2)))
 
-    return conversation_list[choice]
+    if(in_gui):
+        return conversation_list
+    else:
+        choice = int(input("Enter the index of the conversation you want to retrieve: "))
+        print("here are the consequences of your choice:\n\n" + str(json.dumps(conversation_list[choice],indent=2)))
+        return conversation_list[choice]
 
 
 def extract_bot_name(text):
@@ -242,6 +295,13 @@ def get_new_conversation_number():
         return 0
 
 
+
+def get_last_n_lines(file_name, num_lines):
+    last_n_lines = ""
+    with open(file_name) as file:
+        for line in (file.readlines() [-num_lines:]):
+            last_n_lines = last_n_lines + line
+    return last_n_lines
         
 
 
@@ -249,12 +309,11 @@ def main():
     init_openai()
 
     config = {
-        "bot_identity": bots.MARV, # can be changed to bots.AI, bots.SWEETIE, bots.MARV or bots.<YOUR_CUSTOM_BOT>
+        "bot_identity": bots.MARV, # can be changed to bots.DEFAULT, bots.SWEETIE, bots.MARV or bots.<YOUR_CUSTOM_BOT>
         "resume_saved_conversation": False,  # change to true if you want to continue a previously saved conversation
     }
 
     have_conversation(config) 
-    # have_conversation()
 
 
 if __name__ == "__main__":

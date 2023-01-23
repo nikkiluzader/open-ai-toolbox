@@ -1,6 +1,7 @@
 import dearpygui.dearpygui as dpg
 import chat, requests, shutil, re, pyperclip
 from screeninfo import get_monitors
+import os
 
 
 screen_w = get_monitors()[0].width
@@ -8,7 +9,11 @@ screen_h = get_monitors()[0].height
 app_w = 800
 app_h = 600
 
-field_list = {}
+fields = {}
+field_data = {}
+
+conversation_data = []
+conversation_list = []
 
 dpg.create_context()
 
@@ -22,47 +27,78 @@ def print_value(sender):
     print(dpg.get_value(sender))
 
 def copy_to_clipboard(sender):
-    val = dpg.get_value(field_list["response"])
+    val = dpg.get_value(fields["response"])
     print("{}: {} \n\ncopied to clipboard!".format(type(val),val))
     pyperclip.copy(val)
 
 def make_api_call(sender):
-    dpg.show_item(field_list["lin"])
 
     chat.init_openai()
-    
-    
-    if(dpg.get_value(field_list["mtype"]) == "GPT3 - Completion"):
-        dpg.hide_item(field_list["copy"])
-        res = chat.run_model({"mtype":"com", "engine": dpg.get_value(field_list["engine"]), "tokens": dpg.get_value(field_list["tokens"]), "temperature": dpg.get_value(field_list["temp"]), "prompt": dpg.get_value(field_list["prompt"])})
-        #res = format_response(res)
-        #dpg.set_value(field_list["prompt"], "")
-        dpg.hide_item(field_list["lin"])
-        dpg.hide_item(field_list["img"])
-        dpg.show_item(field_list["response"])
-        dpg.show_item(field_list["copy"])
-        dpg.set_value(field_list["response"], res[2:])
-        
-    elif(dpg.get_value(field_list["mtype"]) == "Codex"):
-        dpg.hide_item(field_list["copy"])
-        res = chat.run_model({"mtype":"cod", "engine": dpg.get_value(field_list["engine"]), "tokens": dpg.get_value(field_list["tokens"]), "temperature": dpg.get_value(field_list["temp"]), "prompt": dpg.get_value(field_list["prompt"])})
-        #dpg.set_value(field_list["prompt"], "")
-        dpg.hide_item(field_list["lin"])
-        dpg.hide_item(field_list["img"])
-        dpg.show_item(field_list["response"])
-        dpg.show_item(field_list["copy"])
-        dpg.set_value(field_list["response"], res[2:])
 
-    elif(dpg.get_value(field_list["mtype"]) == "DALLE - Image"):
-        dpg.hide_item(field_list["copy"])
-        res = chat.run_model({"mtype":"img", "temperature": dpg.get_value(field_list["temp"]), "prompt": dpg.get_value(field_list["prompt"])})
-        dpg.hide_item(field_list["img"])
-        imgdata = get_image(res, dpg.get_value(field_list["prompt"]))
-        #dpg.set_value(field_list["prompt"], "")
-        dpg.set_value("imgraw", imgdata)
-        dpg.hide_item(field_list["lin"])
-        dpg.hide_item(field_list["response"])
-        dpg.show_item(field_list["img"])
+    conversation = {}
+    config = {}
+
+    if dpg.get_value(fields["conversation_type"]) == "New Conversation":
+        dpg.hide_item(fields["response"])
+        dpg.hide_item(fields["copy"])
+        dpg.hide_item(fields["conversation_list"])
+        dpg.show_item(fields["loading_indicator"])
+
+        config = {
+            "in_gui": True,
+            "bot_identity": getattr(chat.bots, dpg.get_value(fields["bots"]).upper()),
+            "conversation": "",
+            "model": dpg.get_value(fields["engine"]),
+            "prompt": dpg.get_value(fields["prompt"]),
+            "resume_saved_conversation": False,
+            "on_resume": False,
+            "on_resume_conversation_path": ""
+        }
+        response = chat.have_conversation(config)
+        dpg.set_value(fields["response"], response)
+        dpg.show_item(fields["response"])
+        dpg.show_item(fields["copy"])
+        dpg.hide_item(fields["loading_indicator"])
+    elif dpg.get_value(fields["conversation_type"]) == "No Memory":
+        dpg.hide_item(fields["response"])
+        dpg.hide_item(fields["copy"])
+        dpg.hide_item(fields["conversation_list"])
+        dpg.show_item(fields["loading_indicator"])
+
+        config = {
+            "no_memory": True,
+            "bot_identity": getattr(chat.bots, dpg.get_value(fields["bots"]).upper()),
+            "conversation": "",
+            "temperature": dpg.get_value(fields["temp"]),
+            "tokens": dpg.get_value(fields["tokens"]),
+            "model": dpg.get_value(fields["engine"]),
+            "prompt": dpg.get_value(fields["prompt"])
+        }
+        response = chat.have_conversation(config)
+        dpg.set_value(fields["response"], response)
+        dpg.show_item(fields["response"])
+        dpg.show_item(fields["copy"])
+        dpg.hide_item(fields["loading_indicator"])
+    elif dpg.get_value(fields["conversation_type"]) == "Load Conversation":
+        dpg.hide_item(fields["response"])
+        dpg.hide_item(fields["copy"])
+        dpg.hide_item(fields["conversation_list"])
+        dpg.show_item(fields["loading_indicator"])
+        conversation_index = int(str(dpg.get_value(fields["conversation_list"])[0]))
+        conversation = None
+        for c in conversation_data:
+            if c["index"] == conversation_index:
+                conversation = c
+        conversation["in_gui"] = True
+        conversation["prompt"] = dpg.get_value(fields["prompt"])
+        response = chat.resume_saved_conversation(conversation)
+        dpg.set_value(fields["response"], response)
+        dpg.show_item(fields["response"])
+        dpg.show_item(fields["copy"])
+        dpg.hide_item(fields["loading_indicator"])
+    else:
+        print("You must choose a conversation type.")
+        exit()
 
 
 def display_response(res):
@@ -103,6 +139,21 @@ def get_image(url, name):
         print('Image Couldn\'t be retrieved')
 
 
+def on_select_conversation_type(sender):
+    if dpg.get_value(sender) == "Load Conversation":
+        dpg.show_item(fields["conversation_list"])
+        dpg.hide_item(fields["temp"])
+        dpg.hide_item(fields["tokens"])
+    elif dpg.get_value(sender) == "New Conversation":
+        dpg.hide_item(fields["conversation_list"])
+        dpg.hide_item(fields["temp"])
+        dpg.hide_item(fields["tokens"])
+    elif dpg.get_value(sender) == "No Memory":
+        dpg.hide_item(fields["conversation_list"])
+        dpg.show_item(fields["temp"])
+        dpg.show_item(fields["tokens"])
+
+
 
 width, height, channels, data = dpg.load_image("./images/temp.jpg")
 
@@ -114,15 +165,19 @@ with dpg.window(width=300, tag="Primary Window"):
 
     with dpg.group(horizontal=True):
         with dpg.group():
-
-            combo_models = dpg.add_combo(
-                tag="models",
-                label="Choose Model",
-                items=("GPT3 - Completion", "Codex", "DALLE - Image"),
-                default_value="GPT3 - Completion",
+            path = "./bot_identities/"
+            bot_list = os.listdir(path)
+            exclusion_list = ["__inity__.py","bot_template.py","bots.py", "__pycache__"]
+            bots = [item[:-3].title() for item in bot_list if item not in exclusion_list]
+            exclude = ""
+            combo_bots = dpg.add_combo(
+                tag="bots",
+                label="Choose Bot",
+                items=bots,
+                default_value="Default",
                 callback=print_value
             )
-            field_list["mtype"] = combo_models
+            fields["bots"] = combo_bots
 
             combo_engines = dpg.add_combo(
                 tag="engines",
@@ -131,7 +186,18 @@ with dpg.window(width=300, tag="Primary Window"):
                 default_value="text-davinci-002",
                 callback=print_value
             )
-            field_list["engine"] = combo_engines
+            fields["engine"] = combo_engines
+
+
+            conversation_type = dpg.add_radio_button(
+                tag="conversation_type",
+                label="Type of conversation",
+                items=("New Conversation", "No Memory", "Load Conversation"),
+                default_value="New Conversation",
+                horizontal=True,
+                callback=on_select_conversation_type
+            )
+            fields["conversation_type"] = conversation_type
 
             slider_temperature = dpg.add_slider_float(
                 tag="temp",
@@ -139,19 +205,36 @@ with dpg.window(width=300, tag="Primary Window"):
                 min_value=0.0,
                 max_value=1.0,
                 default_value=1.0,
+                show=False,
                 callback=print_value
             )
-            field_list["temp"] = slider_temperature
+            fields["temp"] = slider_temperature
 
             slider_tokens = dpg.add_slider_int(
                 tag="tokens",
                 label="Max Tokens",
                 min_value=50,
                 max_value=3950,
-                default_value=1000
+                default_value=1000,
+                show=False,
+                callback=print_value
             )
-            field_list["tokens"] = slider_tokens
+            fields["tokens"] = slider_tokens
 
+
+            conversation_data = chat.choose_saved_conversation(in_gui=True)
+            conversations = tuple(str(obj['index']) + "\n" + re.sub(r'(?:\n){2,}', '\n', obj['last_n_lines'].strip()) for obj in conversation_data)
+
+            conversation_list = dpg.add_radio_button(
+                tag="conversation_list",
+                label="Conversation List",
+                items=conversations,
+                default_value=conversations[0],
+                show=False,
+            )
+            fields["conversation_list"] = conversation_list
+            fields["conversation_data"] = conversation_data
+            field_data["conversation_list"] = conversations
 
     dpg.add_separator()
     dpg.add_separator()
@@ -165,7 +248,7 @@ with dpg.window(width=300, tag="Primary Window"):
                 multiline=True,
                 callback=print_value
             )
-            field_list["prompt"] = input_prompt
+            fields["prompt"] = input_prompt
     button_send = dpg.add_button(
         label="Send",
         width=520,
@@ -184,7 +267,7 @@ with dpg.window(width=300, tag="Primary Window"):
             wrap=600,
             show=False
         )
-        field_list["response"] = text_response
+        fields["response"] = text_response
 
 
 
@@ -194,7 +277,7 @@ with dpg.window(width=300, tag="Primary Window"):
             height=512,
             show=False
         )
-        field_list["img"] = img_container
+        fields["img"] = img_container
 
         button_copy = dpg.add_button(
             tag="copy",
@@ -202,16 +285,16 @@ with dpg.window(width=300, tag="Primary Window"):
             show=False,
             callback=copy_to_clipboard
         )
-        field_list["copy"] = button_copy
+        fields["copy"] = button_copy
 
 
     loading_indicator = dpg.add_loading_indicator(
-        tag="lin",
+        tag="loading_indicator",
         pos=[400,300],
-        show=False
+        show=False,
     )
 
-    field_list["lin"] = loading_indicator
+    fields["loading_indicator"] = loading_indicator
 
 
 # dpg.show_debug()

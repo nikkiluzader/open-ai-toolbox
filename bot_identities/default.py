@@ -21,7 +21,7 @@ FREQUENCY_PENALTY = 0.0
 PRESENCE_PENALTY = 0.6
 
 
-AI = {
+DEFAULT = {
     "identity": IDENTITY,
     "starter_pack": STARTER_PACK,
     "exit_text": EXIT_TEXT,
