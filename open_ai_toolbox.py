@@ -58,6 +58,7 @@ def make_api_call(sender):
         dpg.set_value(fields["response"], response)
         dpg.show_item(fields["response"])
         dpg.show_item(fields["copy"])
+        dpg.set_value(fields["prompt"], "")
         dpg.hide_item(fields["loading_indicator"])
     elif dpg.get_value(fields["conversation_type"]) == "No Memory":
         dpg.hide_item(fields["response"])
@@ -78,6 +79,7 @@ def make_api_call(sender):
         dpg.set_value(fields["response"], response)
         dpg.show_item(fields["response"])
         dpg.show_item(fields["copy"])
+        dpg.set_value(fields["prompt"], "")
         dpg.hide_item(fields["loading_indicator"])
     elif dpg.get_value(fields["conversation_type"]) == "Load Conversation":
         dpg.hide_item(fields["response"])
@@ -95,6 +97,7 @@ def make_api_call(sender):
         dpg.set_value(fields["response"], response)
         dpg.show_item(fields["response"])
         dpg.show_item(fields["copy"])
+        dpg.set_value(fields["prompt"], "")
         dpg.hide_item(fields["loading_indicator"])
     else:
         print("You must choose a conversation type.")
