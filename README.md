@@ -6,6 +6,7 @@ A command line and gui application for interacting with the OpenAI API
   - You can now pass a simple config into the ```have_conversation()``` function.
   - Added expanded chat history. Start a new conversation or load a previous one (just set ```resume_saved_conversation``` to ```True```)
   - Added resume interactions to all bots (you dont see these printed, but it helps with continuity in the conversations)
+  - GUI is now operational
 
 ## Features
 - Bot Identities - use the built in bots or create your own with it's own personality
