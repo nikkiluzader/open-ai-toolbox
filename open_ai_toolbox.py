@@ -143,18 +143,25 @@ def get_image(url, name):
 
 
 def on_select_conversation_type(sender):
-    if dpg.get_value(sender) == "Load Conversation":
-        dpg.show_item(fields["conversation_list"])
-        dpg.hide_item(fields["temp"])
-        dpg.hide_item(fields["tokens"])
-    elif dpg.get_value(sender) == "New Conversation":
+    if dpg.get_value(sender) == "New Conversation":
+        dpg.show_item(fields["bots"])
+        dpg.show_item(fields["engine"])
         dpg.hide_item(fields["conversation_list"])
         dpg.hide_item(fields["temp"])
         dpg.hide_item(fields["tokens"])
     elif dpg.get_value(sender) == "No Memory":
+        dpg.show_item(fields["bots"])
+        dpg.show_item(fields["engine"])
         dpg.hide_item(fields["conversation_list"])
         dpg.show_item(fields["temp"])
         dpg.show_item(fields["tokens"])
+    elif dpg.get_value(sender) == "Load Conversation":
+        dpg.show_item(fields["conversation_list"])
+        dpg.hide_item(fields["bots"])
+        dpg.hide_item(fields["engine"])
+        dpg.hide_item(fields["temp"])
+        dpg.hide_item(fields["tokens"])
+
 
 
 
@@ -168,6 +175,16 @@ with dpg.window(width=300, tag="Primary Window"):
 
     with dpg.group(horizontal=True):
         with dpg.group():
+            conversation_type = dpg.add_radio_button(
+                tag="conversation_type",
+                label="Type of conversation",
+                items=("New Conversation", "No Memory", "Load Conversation"),
+                default_value="New Conversation",
+                horizontal=True,
+                callback=on_select_conversation_type
+            )
+            
+            fields["conversation_type"] = conversation_type
             path = "./bot_identities/"
             bot_list = os.listdir(path)
             exclusion_list = ["__inity__.py","bot_template.py","bots.py", "__pycache__"]
@@ -191,16 +208,6 @@ with dpg.window(width=300, tag="Primary Window"):
             )
             fields["engine"] = combo_engines
 
-
-            conversation_type = dpg.add_radio_button(
-                tag="conversation_type",
-                label="Type of conversation",
-                items=("New Conversation", "No Memory", "Load Conversation"),
-                default_value="New Conversation",
-                horizontal=True,
-                callback=on_select_conversation_type
-            )
-            fields["conversation_type"] = conversation_type
 
             slider_temperature = dpg.add_slider_float(
                 tag="temp",
