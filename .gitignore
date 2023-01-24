@@ -132,7 +132,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-conversation.txt
-constants_nikluz.py
+*.txt
 scratch.py
-conversations/
